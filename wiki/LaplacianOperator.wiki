@@ -1,6 +1,4 @@
 {{{
-package test.sparse.eigensolvers;
-
 //Import MTJ classes
 //see http://code.google.com/p/matrix-toolkits-java/
 import no.uib.cipr.matrix.DenseMatrix;
