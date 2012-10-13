@@ -1,3 +1,4 @@
+{{{ExampleDenseMatrix.java}}}
 {{{
 //Import MTJ classes
 //see http://code.google.com/p/matrix-toolkits-java/
