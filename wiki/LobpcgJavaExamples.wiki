@@ -1,4 +1,4 @@
-#Lobpcg Java Examples#
+=Lobpcg Java Examples=
 
 
 {{{ExampleDenseMatrix.java}}}
