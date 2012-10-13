@@ -7,17 +7,18 @@ Run Lobpcg using MS windows batch files
 rem Assume jar files stored in C:\JarFiles
 set CLASSPATH=.;C:\JarFiles\sparse-eig-01.jar;C:\JarFiles\mtj-0.9.14.jar;C:\JarFiles\netlib-java-0.9.3.jar;C:\JarFiles\arpack_combined_all.jar
 
+rem Run Lobpcg tests
 java test/sparse/eigensolvers/TestLobpcg
 pause
 }}}
 
-Compile and run your own java class
 
 {{{test2.bat}}}
 {{{
 rem Assume jar files stored in C:\JarFiles
 set CLASSPATH=.;C:\JarFiles\sparse-eig-01.jar;C:\JarFiles\mtj-0.9.14.jar;C:\JarFiles\netlib-java-0.9.3.jar;C:\JarFiles\arpack_combined_all.jar
 
+rem Compile and run your own java class
 javac ExampleLaplacianOperator.java
 java ExampleLaplacianOperator
 pause
