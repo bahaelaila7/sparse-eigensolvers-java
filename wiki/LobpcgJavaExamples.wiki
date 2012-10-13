@@ -1,6 +1,6 @@
 =Lobpcg Java Examples=
 
-*These java file are also provided in the download file.*
+*These java source files are also provided in the download file.*
 
 
 {{{ExampleDenseMatrix.java}}}
