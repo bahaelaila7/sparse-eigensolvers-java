@@ -6,8 +6,9 @@ Run Lobpcg using Linux with csh shell files
 {{{
 # Assume jar files stored at $HOME/JarFiles
 # set classpath for java
-setenv CLASSPATH $HOME/JarFiles/sparse-eig-01.jar:$HOME/JarFiles/mtj-0.9.14.jar:$HOME/JarFiles/netlib-java-0.9.3.jar:$HOME/JarFiles/arpack_combined_all.jar
+setenv CLASSPATH .:$HOME/JarFiles/sparse-eig-01.jar:$HOME/JarFiles/mtj-0.9.14.jar:$HOME/JarFiles/netlib-java-0.9.3.jar:$HOME/JarFiles/arpack_combined_all.jar
 
+# Run Lobpcg tests
 java  test.sparse.eigensolvers/TestLobpcg
 }}}
 
@@ -18,6 +19,7 @@ java  test.sparse.eigensolvers/TestLobpcg
 # set classpath for java
 setenv CLASSPATH .:$HOME/JarFiles/sparse-eig-01.jar:$HOME/JarFiles/mtj-0.9.14.jar:$HOME/JarFiles/netlib-java-0.9.3.jar:$HOME/JarFiles/arpack_combined_all.jar
 
+# Compile and run your own java class
 javac ExampleLaplacianOperator.java
 java ExampleLaplacianOperator
 }}}
