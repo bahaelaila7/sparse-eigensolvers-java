@@ -12,12 +12,12 @@ java  test.sparse.eigensolvers/TestLobpcg
 }}}
 
 
-{{{test2.bat}}}
+{{{test2}}}
 {{{
-rem Assume jar files stored in C:\JarFiles
-set CLASSPATH=.;C:\JarFiles\sparse-eig-01.jar;C:\JarFiles\mtj-0.9.14.jar;C:\JarFiles\netlib-java-0.9.3.jar;C:\JarFiles\arpack_combined_all.jar
+# Assume jar files stored at $HOME/JarFiles
+# set classpath for java
+setenv CLASSPATH .:$HOME/JarFiles/sparse-eig-01.jar:$HOME/JarFiles/mtj-0.9.14.jar:$HOME/JarFiles/netlib-java-0.9.3.jar:$HOME/JarFiles/arpack_combined_all.jar
 
-rem Compile and run your own java class
 javac ExampleLaplacianOperator.java
 java ExampleLaplacianOperator
-pause
+}}}
