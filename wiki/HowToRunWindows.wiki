@@ -1,6 +1,4 @@
-=How to run Lobpcg on Windows=
-
-Run Lobpcg using MS windows batch files
+=Run Lobpcg using MS windows batch files=
 
 {{{test1.bat}}}
 {{{
@@ -21,7 +19,7 @@ rem set classpath for java
 set CLASSPATH=.;C:\JarFiles\sparse-eig-01.jar;C:\JarFiles\mtj-0.9.14.jar;C:\JarFiles\netlib-java-0.9.3.jar;C:\JarFiles\arpack_combined_all.jar
 
 rem Compile and run your own java class
-javac ExampleLaplacianOperator.java
-java ExampleLaplacianOperator
+javac MyEigenvalueCode.java
+java MyEigenvalueCode
 pause
 }}}
