@@ -1,4 +1,4 @@
-package test.sparse.eigensolvers;
+package sparse.eigensolvers.java;
 
 // Import MTJ classes
 // see http://code.google.com/p/matrix-toolkits-java/

@@ -1,4 +1,4 @@
-package test.sparse.eigensolvers;
+package sparse.eigensolvers.java;
 
 //Import MTJ classes
 import no.uib.cipr.matrix.DenseMatrix;
