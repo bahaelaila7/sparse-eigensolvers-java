@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2012 Rico Argentati
  * 
- * This file is part of SPARSE-EIG.
+ * This file is part of SEJ (Sparse Eigensolvers for Java).
  * 
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General protected License as published by the
@@ -24,9 +24,9 @@ import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.sparse.CompRowMatrix;
 
 /**
-SPARSE-EIG Java SparseEigensolver class.
+SEJ Java SparseEigensolver class.
 <p>
-SPARSE-EIG uses the MTJ Java library (matrix-toolkits-java)
+SEJ uses the MTJ Java library (matrix-toolkits-java)
 and Netlib Java (netlib-java) for numerical linear algebra and matrix computations.
 <p>
 The SparseEigensolver abstract class provides class variables and methods that can be used

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2012 Rico Argentati
  * 
- * This file is part of SPARSE-EIG.
+ * This file is part of SEJ (Sparse Eigensolvers for Java).
  * 
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -21,9 +21,9 @@
 package sparse.eigenvolvers.java;
 
 /**
-SPARSE-EIG Java SparseEigensolverConstants class.
+SEJ Java SparseEigensolverConstants class.
 <p>
-SPARSE-EIG uses the MTJ Java library (matrix-toolkits-java)
+SEJ uses the MTJ Java library (matrix-toolkits-java)
 and Netlib Java (netlib-java) for numerical linear algebra and matrix computations.
 @author Rico Argentati
 */

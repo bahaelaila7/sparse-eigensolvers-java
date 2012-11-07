@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2012 Rico Argentati
  * 
- * This file is part of SPARSE-EIG.
+ * This file is part of SEJ (Sparse Eigensolvers for Java).
  * 
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -25,9 +25,9 @@ import no.uib.cipr.matrix.Matrices;
 import no.uib.cipr.matrix.sparse.CompRowMatrix; 
 
 /**
-SPARSE-EIG Java Operator class.
+SEJ Java Operator class.
 <p>
-SPARSE-EIG uses the MTJ Java library (matrix-toolkits-java)
+SEJ uses the MTJ Java library (matrix-toolkits-java)
 and Netlib Java (netlib-java) for numerical linear algebra and matrix computations.
 <p>
 The Operator class provides convenient methods for defining an operator, in a flexible 

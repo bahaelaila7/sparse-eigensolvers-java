@@ -1,7 +1,7 @@
 	/*
 	 * Copyright (C) 2012 Rico Argentati
 	 * 
-	 * This file is part of SPARSE-EIG.
+	 * This file is part of SEJ (Sparse Eigensolvers for Java).
 	 * 
 	 * This library is free software; you can redistribute it and/or modify it
 	 * under the terms of the GNU Lesser General Public License as published by the
@@ -31,7 +31,7 @@
 import no.uib.cipr.matrix.sparse.IterativeSolverNotConvergedException;
 
 	/**
-	SPARSE-EIG Java public class OperatorPrecCGGeneralized class.
+	SEJ Java public class OperatorPrecCGGeneralized class.
 	<p>
 	This class is experimental
 	<p>
@@ -39,7 +39,7 @@ import no.uib.cipr.matrix.sparse.IterativeSolverNotConvergedException;
 	input block matrix, using {@link #operatorAction(DenseMatrix)}, 
 	by an approximate inverse to the operator T
 	<p>
-	SPARSE-EIG uses the MTJ Java library (matrix-toolkits-java)
+	SEJ uses the MTJ Java library (matrix-toolkits-java)
 	and Netlib Java (netlib-java) for numerical linear algebra and matrix computations.
 	@author Rico Argentati
 	*/

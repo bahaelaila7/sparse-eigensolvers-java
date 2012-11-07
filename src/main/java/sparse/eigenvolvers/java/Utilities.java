@@ -22,6 +22,7 @@ package sparse.eigenvolvers.java;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.TreeSet;
 import java.io.FileReader;
 import java.io.IOException;
@@ -586,16 +587,15 @@ public class Utilities {
 	  *            
 	  */
 	 public static CompRowMatrix readMatrixMarketFile(String file){
+		 CompRowMatrix A=new CompRowMatrix(0,0,new int[0][0]);
 		 try {
 			 MatrixVectorReader reader = new MatrixVectorReader(new FileReader(file));  
-			 CompRowMatrix A = new CompRowMatrix(reader);
-			 return A;
+			 A = new CompRowMatrix(reader);
 		 } catch (IOException e) {
 			 // Print out the exception that occurred
 			 System.out.println("Unable to read Matrix Market file "+e.getMessage());
-			 System.exit(0);
-			 return null;
 		}
+		return A;
 	}
 			 
 	/**
@@ -725,6 +725,28 @@ public class Utilities {
 	}
 	
 	/**
+	 * Generate reproducible random matrix for testing purposes
+	 * Always generate same matrix for given seed
+	 * 
+	 * @param n integer
+	 * @param m integer
+	 * @param seed long
+	 * @return Temp DenseMatrix
+	 *            
+	 */
+	public static DenseMatrix denseMatrixRandomSeed(int m, int n, long seed){
+		DenseMatrix Temp=new DenseMatrix(m,n);
+		if (seed<0) Temp=(DenseMatrix) Matrices.random(m,n); //Used for testing
+		else {
+			Random random = new Random(seed);
+			for (int i=0; i<m; i++){
+				for (int j=0; j<n; j++) Temp.set(i, j, random.nextDouble());
+			}
+		}
+		return Temp;
+	}
+	
+	/**
 	 * Subtract dense matrices: return A-B (A and B unchanged)
 	 * 
 	 * @param A DenseMatrix
@@ -736,6 +758,23 @@ public class Utilities {
 		DenseMatrix Temp=new DenseMatrix(A.numRows(),A.numColumns());
 		Temp=A.copy();
 		Temp.add(-1D,B);
+		return Temp;
+	}
+	
+	/**
+	 * Convert comress row matrix to dense matrix
+	 * 
+	 * @param A DenseMatrix
+	 * @return Temp DenseMatrix
+	 *            
+	 */
+	public static DenseMatrix CompRowMatrixtoDenseMatrix(CompRowMatrix A){
+		DenseMatrix Temp=new DenseMatrix(A.numRows(),A.numColumns());
+		for (int i=0;i<A.numRows();i++) {
+			 for (int j=0;j<A.numColumns();j++) {
+				 Temp.set(i, j, A.get(i, j));
+			 }
+		 }
 		return Temp;
 	}
 	
@@ -802,6 +841,38 @@ public class Utilities {
 		}
 		return B;
 	}
+	
+	/**
+	 * Orthonormalize X
+	 * Works similar to MATLAB orth.m
+	 * Returns matrix who's orthonormal columns span the column space of X
+	 * The returned matrix may have fewer columns than X, if X is not full rank
+	 * 
+	 * @param X DenseMatrix
+	 * @param tolUser double (optional argument)
+	 * @return DenseMatrix
+	 *            
+	 */
+	public static DenseMatrix orth(DenseMatrix X, double ... tolUser){
+		DenseMatrix Temp=new DenseMatrix(0,0);
+		double tol;
+		if (X.numColumns()==0) return Temp;
+		try {
+			SVD svd=SVD.factorize(X);
+			DenseMatrix U=svd.getU();
+			double[] s=svd.getS();
+			if (tolUser.length==0) tol=Math.max(X.numRows(), X.numColumns())*s[0]*calculateMachineEpsilonDouble();
+			else tol=tolUser[0];
+			int ncol=0;
+			for (double d : s) if (d>tol) ++ncol;
+			Temp=new DenseMatrix(X.numRows(),ncol);
+			for (int i=0;i<X.numRows();++i){
+				for (int j=0;j<ncol;++j) Temp.set(i,j,U.get(i,j));
+			}
+		} catch (NotConvergedException e){}
+		return Temp;
+	}
+	
 		
 	/* ------------------------
 	  Package Private Methods
