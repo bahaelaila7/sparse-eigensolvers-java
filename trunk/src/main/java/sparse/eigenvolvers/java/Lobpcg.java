@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2012 Rico Argentati
  * 
- * This file is part of SPARSE-EIG.
+ * This file is part of SEJ (Sparse Eigensolvers for Java).
  * 
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -27,9 +27,9 @@ import no.uib.cipr.matrix.Matrix.Norm;
 import no.uib.cipr.matrix.sparse.CompRowMatrix;
 
 /**
-SPARSE-EIG Java Lobpcg class.
+SEJ Java Lobpcg class.
 <p>
-SPARSE-EIG uses the MTJ Java library (matrix-toolkits-java)
+SEJ uses the MTJ Java library (matrix-toolkits-java)
 and Netlib Java (netlib-java) for numerical linear algebra and matrix computations.
 <p>
 This algorithm is based on BLOPEX (Block Locally Optimal Preconditioned
@@ -313,11 +313,9 @@ public class Lobpcg extends SparseEigensolver {
 		int nn; 	// temporary integer
 		int iterationCount=0;
 		boolean convergenceFlag=false;
-		boolean restartFlag=false;
+		boolean restartFlag=false; // Not used now
 		long maxMemoryUsed=0;
 		DenseMatrix Temp;
-		DenseMatrix Temp1;
-		DenseMatrix Temp2;
 		Integer[] tempInteger;
 		int[] mskIdx=null;
 		ArrayList<Integer> activeMask=null;
@@ -419,7 +417,6 @@ public class Lobpcg extends SparseEigensolver {
 		// Compute the initial Ritz vectors: solve the eigenproblem
 		blockVectorAX=operA.operatorAction(blockVectorX);
 		gramXAX=Utilities.mult(Utilities.trans(blockVectorX),blockVectorAX);
-		
 		Utilities.symmetrizeMatrix(gramXAX); // Make sure that we are really symmetric 
 		
 		// Compute eigenvalues and eigenvectors
@@ -449,10 +446,33 @@ public class Lobpcg extends SparseEigensolver {
 			iterationCount=iterationNumber;
 			// Store current time
 			timeIteration=System.currentTimeMillis();
-
-			// Compute residuals and update active mask and active mask array
-			if (operB.getExists()) blockVectorR=Utilities.sub(blockVectorAX, Utilities.mult(blockVectorBX, EIG));
-			else blockVectorR=Utilities.sub(blockVectorAX, Utilities.mult(blockVectorX, EIG));
+			
+			if (iterationNumber==1){
+				// Compute residuals
+				if (operB.getExists()) blockVectorR=Utilities.sub(blockVectorAX, Utilities.mult(blockVectorBX, EIG));
+				else blockVectorR=Utilities.sub(blockVectorAX, Utilities.mult(blockVectorX, EIG));
+				// Update active mask and active mask array
+				for (int j=0;j<blockSize;++j){
+					residualNorms[j]=Utilities.getMatrix(blockVectorR,j,j).norm(Norm.Frobenius);
+					if (iterationNumber>1){ 
+						if (residualNorms[j]<residualTolerance){
+							// Remove index if in list
+							if (activeMask.indexOf(j)>-1) activeMask.remove(activeMask.indexOf(j));
+						}
+					}
+				}
+				// Update active mask
+				tempInteger=new Integer[activeMask.size()];
+				tempInteger=activeMask.toArray(tempInteger);
+				mskIdx=new int [activeMask.size()];
+				for (int i=0; i < tempInteger.length; i++) mskIdx[i]=tempInteger[i].intValue();
+			}
+			
+			currentBlockSize=activeMask.size();
+			if (currentBlockSize==0){  // Check for convergence of all eigenvalues
+				convergenceFlag=true;
+				break; 
+			}
 			
 			// Implement constraints
 			// Project R onto subspace B-orthogonal to Y (or orthogonal to Y)
@@ -472,29 +492,6 @@ public class Lobpcg extends SparseEigensolver {
 				}
 			}
 
-			// Update active mask and active mask array
-			for (int j=0;j<blockSize;++j){
-				residualNorms[j]=Utilities.getMatrix(blockVectorR,j,j).norm(Norm.Frobenius);
-				if (iterationNumber>1){ 
-					if (residualNorms[j]<residualTolerance){
-						// Remove index if in list
-						if (activeMask.indexOf(j)>-1) activeMask.remove(activeMask.indexOf(j));
-					}
-				}
-			}
-			
-			currentBlockSize=activeMask.size();
-			if (currentBlockSize==0){  // Check for convergence of all eigenvalues
-				convergenceFlag=true;
-				break; 
-			}
-			
-			// Update active mask
-			tempInteger=new Integer[activeMask.size()];
-			tempInteger=activeMask.toArray(tempInteger);
-			mskIdx=new int [activeMask.size()];
-			for (int i=0; i < tempInteger.length; i++) mskIdx[i]=tempInteger[i].intValue();
-			
 			// Apply preconditioner operT to active residuals
 			// R(index)=operT*R(index)
 			if (operT.getExists()){
@@ -707,6 +704,28 @@ public class Lobpcg extends SparseEigensolver {
 						Utilities.getMatrix(blockVectorBP, mskIdx));
 				}
 			}
+			
+			// Compute residuals
+			if (operB.getExists()) blockVectorR=Utilities.sub(blockVectorAX, Utilities.mult(blockVectorBX, EIG));
+			else blockVectorR=Utilities.sub(blockVectorAX, Utilities.mult(blockVectorX, EIG));
+			
+			// Update active mask and active mask array
+			for (int j=0;j<blockSize;++j){
+				residualNorms[j]=Utilities.getMatrix(blockVectorR,j,j).norm(Norm.Frobenius);
+				if (iterationNumber>1){ 
+					if (residualNorms[j]<residualTolerance){
+						// Remove index if in list
+						if (activeMask.indexOf(j)>-1) activeMask.remove(activeMask.indexOf(j));
+					}
+				}
+			}
+			
+			// Update active mask
+			tempInteger=new Integer[activeMask.size()];
+			tempInteger=activeMask.toArray(tempInteger);
+			mskIdx=new int [activeMask.size()];
+			for (int i=0; i < tempInteger.length; i++) mskIdx[i]=tempInteger[i].intValue();
+			
 			// Load data for history data collection
 			for (int i=0;i<blockSize;++i){
 				eigenvalueHistory.set(i, iterationNumber-1, eigenvalues[i]);
@@ -741,72 +760,11 @@ public class Lobpcg extends SparseEigensolver {
 	        	System.out.printf("Iteration number: %d Maximum residual: %e (residual tol = %.2e)\n",
 	        	iterationNumber,getMaxResidualNorm(),residualTolerance);
 			
-			if (eigensolverDebug) {
-				// Check condition numbers of gramA and gramB
-				System.out.printf("conditionGramA=%e\n",conditionGramA);
-				System.out.printf("conditionGramB=%e\n",conditionGramB);
-				// Check ranks
-				System.out.printf("rank blockVectorX = %d \n",rank,Utilities.getRank(blockVectorX));
-				System.out.printf("rank blockVectorR = %d \n",rank,Utilities.getRank(blockVectorR));
-				System.out.printf("rank blockVectorP = %d \n",rank,Utilities.getRank(blockVectorP));
-
-				if (operB.getExists()){
-					System.out.printf("norm(X'*B*X - I)=%e\n", 
-						Utilities.sub(Utilities.mult(Utilities.trans(blockVectorX),
-						blockVectorBX),Matrices.identity(blockVectorX.numColumns())).norm(Norm.Frobenius));
-					Temp1=Utilities.getMatrix(blockVectorR,mskIdx);
-					Temp2=Utilities.getMatrix(blockVectorBR,mskIdx);
-					System.out.printf("norm(R(idx)'*B*R(idx) - I)=%e\n", 
-						Utilities.sub(Utilities.mult(Utilities.trans(Temp1),
-						Temp2),Matrices.identity(Temp1.numColumns())).norm(Norm.Frobenius));
-					Temp1=Utilities.getMatrix(blockVectorP,mskIdx);
-					Temp2=Utilities.getMatrix(blockVectorBP,mskIdx);
-					System.out.printf("norm(P(idx)'*B*P(idx) - I)=%e\n", 
-						Utilities.sub(Utilities.mult(Utilities.trans(Temp1),
-						Temp2),Matrices.identity(Temp1.numColumns())).norm(Norm.Frobenius));
-				}
-				else {
-					System.out.printf("norm(X'*X - I)=%e\n", 
-						Utilities.sub(Utilities.mult(Utilities.trans(blockVectorX),
-						blockVectorX),Matrices.identity(blockVectorX.numColumns()))
-							.norm(Norm.Frobenius));
-					Temp=Utilities.getMatrix(blockVectorR,mskIdx);
-					System.out.printf("norm(R(idx)'*R(idx) - I)=%e\n", 
-						Utilities.sub(Utilities.mult(Utilities.trans(Temp),Temp),
-						Matrices.identity(Temp.numColumns())).norm(Norm.Frobenius));
-					System.out.printf("norm(R'*R - I)=%e\n", 
-						Utilities.sub(Utilities.mult(Utilities.trans(blockVectorR),blockVectorR),
-						Matrices.identity(blockVectorR.numColumns())).norm(Norm.Frobenius));
-					System.out.printf("norm(X'*R)=%e\n", 
-						Utilities.mult(Utilities.trans(blockVectorX),blockVectorR).norm(Norm.Frobenius));
-					Temp=Utilities.getMatrix(blockVectorP,mskIdx);
-					System.out.printf("norm(P(idx)'*P(idx) - I)=%e\n", 
-						Utilities.sub(Utilities.mult(Utilities.trans(Temp),
-						Temp),Matrices.identity(Temp.numColumns()))
-							.norm(Norm.Frobenius));
-				}
-				System.out.printf("Norm of residuals = %e\n",blockVectorR.norm(Norm.Frobenius));
-
-				// Check to see if X is orthogonal to Y
-				if (blockVectorY.numColumns() != 0){
-					if (operB.getExists()) 
-						System.out.printf("Checking if constraints are orthogonal to X norm(Y^T*B*X)=%e\n",
-							Utilities.mult(Utilities.trans(blockVectorY),blockVectorBX).norm(Norm.Frobenius));
-					else System.out.printf("Checking if constraints are orthogonal to X norm(Y^T*X)=%e\n",
-							Utilities.mult(Utilities.trans(blockVectorY),blockVectorX).norm(Norm.Frobenius));
-					Utilities.printMatrixInformation(blockVectorX);
-					Utilities.printMatrixInformation(blockVectorY);
-				}
-				// Print time for last matrix multiply
-				System.out.printf("Time for operA: %10.5f seconds (%d ms)\n",
-					operA.getTimeOperatorApply()/1000.,operA.getTimeOperatorApply());
-				System.out.printf("Time for operB: %10.5f seconds (%d ms)\n",
-						operB.getTimeOperatorApply()/1000.,operB.getTimeOperatorApply());
-				System.out.printf("Time for operT: %10.5f seconds (%d ms)\n",
-						operT.getTimeOperatorApply()/1000.,operT.getTimeOperatorApply());
-				System.out.printf("\n");
-			}
+			if (eigensolverDebug) 
+				debug(conditionGramA,conditionGramB,blockVectorX,blockVectorR,blockVectorP,
+				blockVectorBX,blockVectorBR,blockVectorBP,mskIdx);
 		}
+	
 		// Save number of iterations that were executed
 		setNumbIterationsExecuted(iterationCount);
 		
@@ -847,7 +805,78 @@ public class Lobpcg extends SparseEigensolver {
 			System.out.println("Exiting Lobpcg!\n\n");
 		}
 		if (convergenceFlag) return(1); // Converged
-		else return(-1);   				// Did not converge
+		else return(-1);  // Did not converge
+	}
+	
+	// Print out debug information
+	void debug(double conditionGramA,double conditionGramB,DenseMatrix blockVectorX,
+		DenseMatrix blockVectorR,DenseMatrix blockVectorP,DenseMatrix blockVectorBX,
+		DenseMatrix blockVectorBR,DenseMatrix blockVectorBP,int[] mskIdx){
+		DenseMatrix Temp;
+		DenseMatrix Temp1;
+		DenseMatrix Temp2;
+		
+		// Check condition numbers of gramA and gramB
+		System.out.printf("conditionGramA=%e\n",conditionGramA);
+		System.out.printf("conditionGramB=%e\n",conditionGramB);
+		// Check ranks
+		System.out.printf("rank blockVectorX = %d \n",Utilities.getRank(blockVectorX));
+		System.out.printf("rank blockVectorR = %d \n",Utilities.getRank(blockVectorR));
+		System.out.printf("rank blockVectorP = %d \n",Utilities.getRank(blockVectorP));
+
+		if (operB.getExists()){
+			System.out.printf("norm(X'*B*X - I)=%e\n", 
+				Utilities.sub(Utilities.mult(Utilities.trans(blockVectorX),
+				blockVectorBX),Matrices.identity(blockVectorX.numColumns())).norm(Norm.Frobenius));
+			Temp1=Utilities.getMatrix(blockVectorR,mskIdx);
+			Temp2=Utilities.getMatrix(blockVectorBR,mskIdx);
+			System.out.printf("norm(R(idx)'*B*R(idx) - I)=%e\n", 
+				Utilities.sub(Utilities.mult(Utilities.trans(Temp1),
+				Temp2),Matrices.identity(Temp1.numColumns())).norm(Norm.Frobenius));
+			Temp1=Utilities.getMatrix(blockVectorP,mskIdx);
+			Temp2=Utilities.getMatrix(blockVectorBP,mskIdx);
+			System.out.printf("norm(P(idx)'*B*P(idx) - I)=%e\n", 
+				Utilities.sub(Utilities.mult(Utilities.trans(Temp1),
+				Temp2),Matrices.identity(Temp1.numColumns())).norm(Norm.Frobenius));
+		}
+		else {
+			System.out.printf("norm(X'*X - I)=%e\n", 
+				Utilities.sub(Utilities.mult(Utilities.trans(blockVectorX),
+				blockVectorX),Matrices.identity(blockVectorX.numColumns()))
+					.norm(Norm.Frobenius));
+			Temp=Utilities.getMatrix(blockVectorR,mskIdx);
+			System.out.printf("norm(R(idx)'*R(idx) - I)=%e\n", 
+				Utilities.sub(Utilities.mult(Utilities.trans(Temp),Temp),
+				Matrices.identity(Temp.numColumns())).norm(Norm.Frobenius));
+			System.out.printf("norm(R'*R - I)=%e\n", 
+				Utilities.sub(Utilities.mult(Utilities.trans(blockVectorR),blockVectorR),
+				Matrices.identity(blockVectorR.numColumns())).norm(Norm.Frobenius));
+			System.out.printf("norm(X'*R)=%e\n", 
+				Utilities.mult(Utilities.trans(blockVectorX),blockVectorR).norm(Norm.Frobenius));
+			Temp=Utilities.getMatrix(blockVectorP,mskIdx);
+			System.out.printf("norm(P(idx)'*P(idx) - I)=%e\n", 
+				Utilities.sub(Utilities.mult(Utilities.trans(Temp),
+				Temp),Matrices.identity(Temp.numColumns()))
+					.norm(Norm.Frobenius));
+		}
+		System.out.printf("Norm of residuals = %e\n",blockVectorR.norm(Norm.Frobenius));
+		// Check to see if X is orthogonal to Y
+		if (blockVectorY.numColumns() != 0){
+			if (operB.getExists()) 
+				System.out.printf("Checking if constraints are orthogonal to X norm(Y^T*B*X)=%e\n",
+					Utilities.mult(Utilities.trans(blockVectorY),blockVectorBX).norm(Norm.Frobenius));
+			else System.out.printf("Checking if constraints are orthogonal to X norm(Y^T*X)=%e\n",
+					Utilities.mult(Utilities.trans(blockVectorY),blockVectorX).norm(Norm.Frobenius));
+			Utilities.printMatrixInformation(blockVectorX);
+			Utilities.printMatrixInformation(blockVectorY);
+		}
+		// Print time for last matrix multiply
+		System.out.printf("Time for operA: %10.5f seconds (%d ms)\n",
+			operA.getTimeOperatorApply()/1000.,operA.getTimeOperatorApply());
+		System.out.printf("Time for operB: %10.5f seconds (%d ms)\n",
+				operB.getTimeOperatorApply()/1000.,operB.getTimeOperatorApply());
+		System.out.printf("Time for operT: %10.5f seconds (%d ms)\n",
+				operT.getTimeOperatorApply()/1000.,operT.getTimeOperatorApply());
+		System.out.printf("\n");
 	}
 }
-	
