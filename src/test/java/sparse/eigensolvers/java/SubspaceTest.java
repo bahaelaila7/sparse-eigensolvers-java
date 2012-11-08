@@ -20,7 +20,6 @@
 
 package sparse.eigensolvers.java;
 
-import static org.junit.Assert.*;
 import junit.framework.TestCase;
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.Matrices;
@@ -28,65 +27,56 @@ import no.uib.cipr.matrix.Matrices;
 import org.junit.Test;
 
 import sparse.eigenvolvers.java.Subspace;
-import sparse.eigenvolvers.java.Utilities;
 
 public class SubspaceTest  extends TestCase {
 
+	
+	// Test accuracy for general angles
 	@Test
-	public void testAccuarcy() {
+	public void testAccuracyGeneral() {
 		int n=100;
-		int p=10;
-		int q=10;
+		// Input is tangent of angles
+		double[] inputTangent={100,50,10,1,.5,1e-1,1e-4,1e-6,1e-8}; 
 		
-//		DenseMatrix X=(DenseMatrix) Matrices.random(n, p);
-//		DenseMatrix Y=(DenseMatrix) Matrices.random(n, q);
+		DenseMatrix X=new DenseMatrix(n, inputTangent.length);
+		DenseMatrix Y=new DenseMatrix(n, inputTangent.length);
+		for (int i=0; i<inputTangent.length; ++i) X.set(i,i,1D);
+		for (int i=0; i<inputTangent.length; ++i) X.set(i+inputTangent.length,i,inputTangent[i]);
+		for (int i=0; i<inputTangent.length; ++i) Y.set(i,i,1D);
 		
-		DenseMatrix X=new DenseMatrix(2,1);
-		DenseMatrix Y=new DenseMatrix(2,1);
-		X.set(0, 0, 1);
-		Y.set(0, 0, 1);
-//		Y.set(1, 0, 1);
-//		Y.set(1, 0, 1e-4);
-//		Y.set(1, 0, 1e-6);
-//		Y.set(1, 0, 1e-8);
-//		Y.set(1, 0, 1e-10);
-//		Y.set(1, 0, 1e-16);
-		Y.set(1, 0, 1e-20);
-//		Y.set(1, 0, 1e-30);
+		// Multiply on right by random matrices (does not change column space)
+		DenseMatrix XX=(DenseMatrix) Matrices.random(inputTangent.length,inputTangent.length);
+		DenseMatrix YY=(DenseMatrix) Matrices.random(inputTangent.length,inputTangent.length);
+		DenseMatrix Temp=new DenseMatrix(n, inputTangent.length);
+		X.mult(XX, Temp); X=Temp;
+		Temp=new DenseMatrix(n, inputTangent.length);
+		Y.mult(YY, Temp); Y=Temp;
 		
 		double[] s=Subspace.getPrincipleAngles(X, Y);
-		System.out.println("Check accuracy");
-		Utilities.print(s);
-		fail("Not yet implemented");
+		double err=0;
+		for (int i=0; i<s.length; ++i) err=err+Math.pow(Math.atan(inputTangent[i])-s[i],2);
+		err=Math.sqrt(err);
+		assertTrue(err<1e-10);
 	}
 	
-	public void testAllPrincipalAngles() {
+	
+	// Test accuracy for small angles
+	@Test
+	public void testAccuracySmall() {
 		int n=100;
-		int p=10;
-		int q=10;
+		// Input is tangent of angles
+		double[] inputTangent={1e-8,1e-16,1e-20,1e-30,0,0}; 
 		
-		DenseMatrix X=(DenseMatrix) Matrices.random(n, p);
-		DenseMatrix Y=(DenseMatrix) Matrices.random(n, q);
+		DenseMatrix X=new DenseMatrix(n, inputTangent.length);
+		DenseMatrix Y=new DenseMatrix(n, inputTangent.length);
+		for (int i=0; i<inputTangent.length; ++i) X.set(i,i,1D);
+		for (int i=0; i<inputTangent.length; ++i) X.set(i+inputTangent.length,i,inputTangent[i]);
+		for (int i=0; i<inputTangent.length; ++i) Y.set(i,i,1D);
 		
 		double[] s=Subspace.getPrincipleAngles(X, Y);
-		Utilities.print(s);
-		System.out.println(Subspace.getPrincipleAnglesLargest(X, Y));
-		s=Subspace.getPrincipleAnglesSines(X, Y);
-		Utilities.print(s);
+		double err=0;
+		for (int i=0; i<s.length; ++i) err=err+Math.pow(Math.atan(inputTangent[i])-s[i],2);
+		err=Math.sqrt(err);
+		assertTrue(err<1e-20);
 	}
-	
-//	public void testMisc() {
-//		System.out.println("running testMisc");
-//		int n=5;
-//		int m=2;
-//		DenseMatrix X=(DenseMatrix) Matrices.random(n, m);
-//		DenseMatrix Y=Utilities.blockMatrix(1,2,X,X);
-//		DenseMatrix Z=new DenseMatrix(0,0);
-////		Y=Utilities.orth(X);
-//		Utilities.print(Utilities.orth(X));
-//		Utilities.print(Utilities.orth(Y));
-////		Utilities.print(Y);
-//		
-//	}
-
 }
