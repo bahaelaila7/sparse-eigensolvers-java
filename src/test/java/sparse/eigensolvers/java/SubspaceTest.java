@@ -23,14 +23,11 @@ package sparse.eigensolvers.java;
 import junit.framework.TestCase;
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.Matrices;
-
 import org.junit.Test;
-
 import sparse.eigenvolvers.java.Subspace;
 
 public class SubspaceTest  extends TestCase {
 
-	
 	// Test accuracy for general angles
 	@Test
 	public void testAccuracyGeneral() {
@@ -79,4 +76,5 @@ public class SubspaceTest  extends TestCase {
 		err=Math.sqrt(err);
 		assertTrue(err<1e-20);
 	}
+	
 }

@@ -20,14 +20,12 @@
 
 package sparse.eigensolvers.java;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-
 import org.junit.Test;
-
 import junit.framework.TestCase;
 import no.uib.cipr.matrix.DenseMatrix;
-import no.uib.cipr.matrix.Matrices;
 import no.uib.cipr.matrix.NotConvergedException;
 import no.uib.cipr.matrix.QR;
 import no.uib.cipr.matrix.SVD;
@@ -304,29 +302,39 @@ public class LobpcgTest extends TestCase  {
 		double error1,error2;
 		DenseMatrix blockVectorX;
 		Lobpcg lobpcg=new Lobpcg();;
+		String file;
 		
 		DenseMatrix Eig=new DenseMatrix(0,0);
 		DenseMatrix EigVec=new DenseMatrix(0,0);
 		
+		// Get path
+		String path=null;
+		File dir = new File(".");
+        try {
+        	path=dir.getCanonicalPath();
+        } catch (Exception e) {}
+	        
 		// Get eigenvalues
-		String file1="C:\\MatrixMarket\\Laplacian20x20x20Eig.mtx";
+        file=path+"\\src\\test\\resources\\Laplacian20x20x20Eig.mtx";
+        if (!System.getProperty("os.name").startsWith("Windows")) file = file.replace("\\", "/"); 
 		try {
-			 MatrixVectorReader reader = new MatrixVectorReader(new FileReader(file1));  
+			 MatrixVectorReader reader = new MatrixVectorReader(new FileReader(file));  
 			 CompRowMatrix Eig1 = new CompRowMatrix(reader);
 			 Eig=Utilities.CompRowMatrixtoDenseMatrix(Eig1);
 		} catch (IOException e) {
-			fail("Can't find matrix market file: "+file1);
+			fail("Can't find matrix market file: "+file);
 			flag=false;
 		}
 
 		// Get eigenvectors
-		String file2="C:\\MatrixMarket\\Laplacian20x20x20Vec.mtx";
+		file=path+"\\src\\test\\resources\\Laplacian20x20x20Vec.mtx";
+		if (!System.getProperty("os.name").startsWith("Windows")) file = file.replace("\\", "/"); 
 		try {
-			 MatrixVectorReader reader = new MatrixVectorReader(new FileReader(file2));  
+			 MatrixVectorReader reader = new MatrixVectorReader(new FileReader(file));  
 			 CompRowMatrix EigVec1 = new CompRowMatrix(reader);
 			 EigVec=Utilities.CompRowMatrixtoDenseMatrix(EigVec1);
 		} catch (IOException e) {
-			fail("Can't find matrix market file: "+file2);
+			fail("Can't find matrix market file: "+file);
 			flag=false;
 		}
 		
@@ -367,28 +375,38 @@ public class LobpcgTest extends TestCase  {
 		double error1,error2;
 		DenseMatrix blockVectorX;
 		Lobpcg lobpcg=new Lobpcg();;
+		String file;
 		DenseMatrix Eig=new DenseMatrix(0,0);
 		DenseMatrix EigVec=new DenseMatrix(0,0);
 		
+		// Get path
+		String path=null;
+		File dir = new File(".");
+        try {
+        	path=dir.getCanonicalPath();
+        } catch (Exception e) {}
+        
 		// Get eigenvalues
-		String file1="C:\\MatrixMarket\\LaplacianAB20x20x20Eig.mtx";
+		file=path+"\\src\\test\\resources\\LaplacianAB20x20x20Eig.mtx";
+		if (!System.getProperty("os.name").startsWith("Windows")) file = file.replace("\\", "/");
 		try {
-			 MatrixVectorReader reader = new MatrixVectorReader(new FileReader(file1));  
+			 MatrixVectorReader reader = new MatrixVectorReader(new FileReader(file));  
 			 CompRowMatrix Eig1 = new CompRowMatrix(reader);
 			 Eig=Utilities.CompRowMatrixtoDenseMatrix(Eig1);
 		} catch (IOException e) {
-			fail("Can't find matrix market file: "+file1);
+			fail("Can't find matrix market file: "+file);
 			flag=false;
 		}
 
 		// Get eigenvectors
-		String file2="C:\\MatrixMarket\\LaplacianAB20x20x20Vec.mtx";
+		file=path+"\\src\\test\\resources\\LaplacianAB20x20x20Vec.mtx";
+		if (!System.getProperty("os.name").startsWith("Windows")) file = file.replace("\\", "/");
 		try {
-			 MatrixVectorReader reader = new MatrixVectorReader(new FileReader(file2));  
+			 MatrixVectorReader reader = new MatrixVectorReader(new FileReader(file));  
 			 CompRowMatrix EigVec1 = new CompRowMatrix(reader);
 			 EigVec=Utilities.CompRowMatrixtoDenseMatrix(EigVec1);
 		} catch (IOException e) {
-			fail("Can't find matrix market file: "+file2);
+			fail("Can't find matrix market file: "+file);
 			flag=false;
 		}
 		
