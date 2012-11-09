@@ -70,19 +70,6 @@ public class Subspace {
 			QY=Utilities.orth(Y);
 		}
 		
-		// Orthonormalize X and Y
-//		if (X.numColumns()<Y.numColumns()){ //Switch X and Y in this case
-//			QR qr=QR.factorize(Y.copy());
-//			QX=qr.getQ();
-//			qr=QR.factorize(X.copy());
-//			QY=qr.getQ();
-//		} else {
-//			QR qr=QR.factorize(X.copy());
-//			QX=qr.getQ();
-//			qr=QR.factorize(Y.copy());
-//			QY=qr.getQ();
-//		}
-		
 		// Compute QY=QY-QX*(QX^T*QY)
 		DenseMatrix Z=new DenseMatrix(QX.numRows(),QY.numColumns());
 		DenseMatrix Temp1=new DenseMatrix(QX.numColumns(),QX.numRows());
